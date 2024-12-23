@@ -1,50 +1,70 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
+import java.util.List;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
+
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.DoubleEntry;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
+import frc.robot.VisionPoseEstimator;
 
-public class Swerve extends SubsystemBase {
+public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
 
-    private DoubleEntry simAngle = NetworkTableInstance.getDefault().getDoubleTopic("sim_angle").getEntry(90);
-    private StructPublisher<Pose2d> mt1 = NetworkTableInstance.getDefault()
-            .getStructTopic("MegaTag1", Pose2d.struct).publish();
-    private StructPublisher<Pose2d> mt2 = NetworkTableInstance.getDefault()
-            .getStructTopic("MegaTag2", Pose2d.struct).publish();
+    private static final double TRACK_WIDTH = Units.inchesToMeters(24), TRACK_LENGTH = Units.inchesToMeters(24);
+
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+            new Translation2d(TRACK_LENGTH / 2, TRACK_WIDTH / 2),
+            new Translation2d(TRACK_LENGTH / 2, -TRACK_WIDTH / 2),
+            new Translation2d(-TRACK_LENGTH / 2, -TRACK_WIDTH / 2),
+            new Translation2d(-TRACK_LENGTH / 2, TRACK_WIDTH / 2));
+
+    private final StructPublisher<Pose2d> odometryPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("PoseEstimate/Odometry", Pose2d.struct).publish();
+
+    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(),
+            getModulePositions().toArray(new SwerveModulePosition[0]),
+            new Pose2d());
+
+    private final Pigeon2 imu = new Pigeon2(0);
 
     public Swerve() {
-        simAngle.set(90);
-        mt1.set(new Pose2d());
-        mt2.set(new Pose2d());
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
     }
 
     public Rotation2d getYaw() {
-        return Rotation2d.fromDegrees(simAngle.get());
+        return imu.getRotation2d();
+    }
+
+    public Rotation2d getYawRate() {
+        return Rotation2d.fromDegrees(imu.getRate());
+    }
+
+    public List<SwerveModulePosition> getModulePositions() {
+        // FIXME: Left as an exercise for the reader
+        return List.of(new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(),
+                new SwerveModulePosition());
+    }
+
+    public void addVisionMeasurement(Pose2d pose, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        poseEstimator.addVisionMeasurement(pose, timestampSeconds, visionMeasurementStdDevs);
     }
 
     @Override
     public void periodic() {
-        super.periodic();
-        LimelightHelpers.SetRobotOrientation("", getYaw().getDegrees(), 0, 0, 0, 0, 0);
-
-        var mt1Measurement = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue(""));
-        mt1Measurement.ifPresent((pe) -> {
-            mt1.set(pe.pose);
-        });
-        var mt2Measurement = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(""));
-        mt2Measurement.ifPresent((pe) -> {
-            mt2.set(pe.pose);
-        });
+        poseEstimator.update(getYaw(), getModulePositions().toArray(new SwerveModulePosition[0]));
+        odometryPublisher.set(poseEstimator.getEstimatedPosition());
     }
+
 }
