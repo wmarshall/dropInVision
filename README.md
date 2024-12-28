@@ -4,7 +4,9 @@ I've seen over a decade of folks, including myself, struggle to implement workab
 
 ## What you have to do:
 
-### Code changes
+1. Copy [this folder](https://github.com/wmarshall/dropInVision/tree/main/src/main/java/com/wcmarshall/dropinlimelight) into `src/main/java` in your WPILib project.
+
+### Make code changes
 
 1. Implement the `Chassis` interface in your drive code.
 2. Configure the `VisionPoseEstimator::ROBOT_TO_CAMERA` transform using a tape measure or CAD. Or guess and check.
