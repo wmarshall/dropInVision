@@ -1,6 +1,7 @@
 //LimelightHelpers v1.10 (REQUIRES LLOS 2024.9.1 OR LATER)
+// Yoinked from https://github.com/LimelightVision/limelightlib-wpijava
 
-package frc.robot;
+package com.wcmarshall.dropinlimelight;
 
 import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTable;

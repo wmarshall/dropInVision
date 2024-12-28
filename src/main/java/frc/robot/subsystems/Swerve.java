@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import java.util.List;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.wcmarshall.dropinlimelight.VisionPoseEstimator;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -18,7 +19,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.VisionPoseEstimator;
 
 public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
 
@@ -47,7 +47,7 @@ public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis
         return imu.getRotation2d();
     }
 
-    public Rotation2d getYawRate() {
+    public Rotation2d getYawPerSecond() {
         return Rotation2d.fromDegrees(imu.getRate());
     }
 

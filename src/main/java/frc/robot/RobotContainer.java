@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.wcmarshall.dropinlimelight.VisionPoseEstimator;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Swerve;
@@ -14,7 +16,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     // addPeriodic, but accessible from down here
-    Commands.run(vpe::periodic);
+    Commands.run(vpe::periodic).withName("VisionPoseEstimator::periodic");
   }
 
   public Command getAutonomousCommand() {
