@@ -24,6 +24,14 @@ public final class VisionPoseEstimator {
 
         Rotation2d getYawPerSecond();
 
+        /**
+         * Passthrough to {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
+         * addVisionMeasurement
+         *
+         * @param pose
+         * @param timestampSeconds
+         * @param visionMeasurementStdDevs
+         */
         void addVisionMeasurement(Pose2d pose, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
     }
 
@@ -39,7 +47,7 @@ public final class VisionPoseEstimator {
 
     /**
      * Create a VisionPoseEstimator
-     * 
+     *
      * @param chassis       the robot chassis to estimate the pose of
      * @param limelightName passed down to calls to LimelightHelpers, useful if you
      *                      have more than one Limelight on a robot
@@ -62,7 +70,7 @@ public final class VisionPoseEstimator {
 
     /**
      * Create a VisionPoseEstimator
-     * 
+     *
      * @param chassis the robot chassis to estimate the pose of
      */
     public VisionPoseEstimator(Chassis chassis) {
