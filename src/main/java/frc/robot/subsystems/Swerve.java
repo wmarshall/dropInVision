@@ -18,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
@@ -33,22 +34,22 @@ public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis
     private final StructPublisher<Pose2d> odometryPublisher = NetworkTableInstance.getDefault()
             .getStructTopic("PoseEstimate/Odometry", Pose2d.struct).publish();
 
-    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(),
-            getModulePositions().toArray(new SwerveModulePosition[0]),
-            new Pose2d());
-
-    private final Pigeon2 imu = new Pigeon2(0);
+    private final Pigeon2 imu;
+    private final SwerveDrivePoseEstimator poseEstimator;
 
     public Swerve() {
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        imu = new Pigeon2(0);
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, imu.getRotation2d(),
+                getModulePositions().toArray(new SwerveModulePosition[0]),
+                new Pose2d());
     }
 
     public Rotation2d getYaw() {
         return imu.getRotation2d();
     }
 
-    public Rotation2d getYawPerSecond() {
-        return Rotation2d.fromDegrees(imu.getRate());
+    public AngularVelocity getYawPerSecond() {
+        return imu.getAngularVelocityZWorld().getValue();
     }
 
     public List<SwerveModulePosition> getModulePositions() {

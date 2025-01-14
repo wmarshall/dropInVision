@@ -1,5 +1,7 @@
 package com.wcmarshall.dropinlimelight;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.Optional;
 
 import edu.wpi.first.math.Matrix;
@@ -12,6 +14,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 public final class VisionPoseEstimator {
 
@@ -22,7 +25,7 @@ public final class VisionPoseEstimator {
 
         Rotation2d getYaw();
 
-        Rotation2d getYawPerSecond();
+        AngularVelocity getYawPerSecond();
 
         /**
          * Passthrough to {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
@@ -39,7 +42,7 @@ public final class VisionPoseEstimator {
     private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
 
     // reject new poses if spinning too fast
-    private static final double MAX_ROTATIONS_PER_SECOND = 2;
+    private static final AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(2);
 
     private final StructPublisher<Pose2d> mt2Publisher;
     private final Chassis chassis;
@@ -84,7 +87,7 @@ public final class VisionPoseEstimator {
      *         Optional.empty if it is unavailable or untrustworthy
      */
     public Optional<LimelightHelpers.PoseEstimate> getPoseEstimate() {
-        if (Math.abs(chassis.getYawPerSecond().getRotations()) > MAX_ROTATIONS_PER_SECOND) {
+        if (chassis.getYawPerSecond().abs(RotationsPerSecond) > MAX_ANGULAR_VELOCITY.abs(RotationsPerSecond)) {
             return Optional.empty();
         }
         var est = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName));
