@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import java.util.List;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.wcmarshall.dropinlimelight.VisionPoseEstimator;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,9 +20,15 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
+
+    private static final Alert ANGLE_RESET_ALERT = new Alert("Failed to reset angle", AlertType.kWarning);
 
     private static final double TRACK_WIDTH = Units.inchesToMeters(24), TRACK_LENGTH = Units.inchesToMeters(24);
 
@@ -39,13 +46,26 @@ public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis
 
     public Swerve() {
         imu = new Pigeon2(0);
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, imu.getRotation2d(),
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(),
                 getModulePositions().toArray(new SwerveModulePosition[0]),
                 new Pose2d());
     }
 
+    private Rotation2d expectedZeroRotation() {
+        // In WPILib field coordinate system, 0 is away from the blue wall. We will assume the robot is always facing _away_ from its alliance wall at boot and rezeroing
+        if (DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) {
+            return new Rotation2d();
+        }else {
+            return new Rotation2d(Rotations.of(0.5));
+        }
+    }
+
+    public void resetRotation() {
+        ANGLE_RESET_ALERT.set(!imu.setYaw(expectedZeroRotation().getDegrees()).isOK());
+    }
+
     public Rotation2d getYaw() {
-        return imu.getRotation2d();
+        return imu.getRotation2d().plus(expectedZeroRotation());
     }
 
     public AngularVelocity getYawPerSecond() {
