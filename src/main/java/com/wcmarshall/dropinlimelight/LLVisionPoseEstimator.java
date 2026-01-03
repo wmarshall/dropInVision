@@ -16,7 +16,7 @@ public final class LLVisionPoseEstimator {
     // reject new poses if spinning too fast
     private static final AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(2);
 
-    private final StructPublisher<Pose2d> mt2Publisher;
+    private final StructPublisher<Pose2d> posePublisher;
     private final Chassis chassis;
     private final String limelightName, limelightHostname;
 
@@ -34,9 +34,9 @@ public final class LLVisionPoseEstimator {
         this.limelightName = limelightName;
         this.limelightHostname = "limelight" + (limelightName != "" ? "-" + limelightName : "");
 
-        mt2Publisher = NetworkTableInstance.getDefault()
+        posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionPoseEstimator/limelight/" + this.limelightName, Pose2d.struct).publish();
-        mt2Publisher.setDefault(new Pose2d());
+        posePublisher.setDefault(new Pose2d());
 
         LimelightHelpers.setCameraPose_RobotSpace(limelightName, robotToCamera.getX(), robotToCamera.getY(),
                 robotToCamera.getZ(), Math.toDegrees(robotToCamera.getRotation().getX()),
@@ -75,7 +75,7 @@ public final class LLVisionPoseEstimator {
         LimelightHelpers.SetRobotOrientation(limelightName, chassis.getYaw().getDegrees(), 0, 0, 0, 0, 0);
 
         getPoseEstimate().ifPresent((pe) -> {
-            mt2Publisher.set(pe.pose);
+            posePublisher.set(pe.pose);
             // LimelightHelpers doesn't expose a helper method for these, layout is:
             // [MT1x, MT1y, MT1z, MT1roll, MT1pitch, MT1Yaw, MT2x, MT2y, MT2z, MT2roll,
             // MT2pitch, MT2yaw]
