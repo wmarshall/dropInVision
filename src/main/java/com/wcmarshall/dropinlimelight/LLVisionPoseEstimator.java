@@ -4,38 +4,14 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.Optional;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public final class LLVisionPoseEstimator {
-
-    /**
-     * Provides the methods needed to do first-class pose estimation
-     */
-    public static interface Chassis {
-
-        Rotation2d getYaw();
-
-        AngularVelocity getYawPerSecond();
-
-        /**
-         * Passthrough to {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
-         * addVisionMeasurement
-         *
-         * @param pose
-         * @param timestampSeconds
-         * @param visionMeasurementStdDevs
-         */
-        void addVisionMeasurement(Pose2d pose, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
-    }
 
     // reject new poses if spinning too fast
     private static final AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(2);
