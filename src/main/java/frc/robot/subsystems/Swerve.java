@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import java.util.List;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.wcmarshall.dropinlimelight.VisionPoseEstimator;
+import com.wcmarshall.dropinlimelight.LLVisionPoseEstimator;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
+public class Swerve extends SubsystemBase implements LLVisionPoseEstimator.Chassis {
 
     private static final Alert ANGLE_RESET_ALERT = new Alert("Failed to reset angle", AlertType.kWarning);
 
