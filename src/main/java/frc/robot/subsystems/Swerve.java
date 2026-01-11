@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import java.util.List;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.wcmarshall.dropinlimelight.VisionPoseEstimator;
+import com.wcmarshall.dropinlimelight.Chassis;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis {
+public class Swerve extends SubsystemBase implements Chassis {
 
     private static final Alert ANGLE_RESET_ALERT = new Alert("Failed to reset angle", AlertType.kWarning);
 
@@ -52,10 +52,12 @@ public class Swerve extends SubsystemBase implements VisionPoseEstimator.Chassis
     }
 
     private Rotation2d expectedZeroRotation() {
-        // In WPILib field coordinate system, 0 is away from the blue wall. We will assume the robot is always facing _away_ from its alliance wall at boot and rezeroing
+        // In WPILib field coordinate system, 0 is away from the blue wall. We will
+        // assume the robot is always facing _away_ from its alliance wall at boot and
+        // rezeroing
         if (DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) {
             return new Rotation2d();
-        }else {
+        } else {
             return new Rotation2d(Rotations.of(0.5));
         }
     }
